@@ -15,21 +15,44 @@ db.connect(function(err) {
     if (err) throw err;
     console.log("Connected!");
 
+    //Create User Table
     const createUserTableQuery = `
-        CREATE TABLE IF NOT EXISTS user_table (
+        CREATE TABLE IF NOT EXISTS users (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             email VARCHAR(255) NOT NULL,
-            password VARCHAR(255) NOT NULL
+            password VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     `;
 
-    // Execute the query
-    db.query(createUserTableQuery, (err, result) => {
+    //Credate user_profiles table
+    const createUserProfileTableQuery = `
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            email VARCHAR(255) NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    `;
+
+    // Enable uuid-ossp extension
+    const enableUuidOsspQuery = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`;
+
+    db.query(enableUuidOsspQuery, (err, result) => {
         if (err) throw err;
-        console.log("user_table created successfully");
-        
-        // Close the connection after executing the query
-        db.end();
+    
+        // Now, execute the CREATE TABLE query
+        db.query(createUserTableQuery, (err, result) => {
+            if (err) throw err;
+            console.log("user table created successfully");
+    
+            // Close the connection after executing the queries
+            db.end();
+        });
+
+
     });
   });
 
