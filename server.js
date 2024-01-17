@@ -20,6 +20,8 @@ db.connect(function(err) {
         CREATE TABLE IF NOT EXISTS users (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             email VARCHAR(255) NOT NULL,
+            first_name VARCHAR(255) NOT NULL,
+            last_name VARCHAR(255) NOT NULL,
             password VARCHAR(255) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -27,11 +29,14 @@ db.connect(function(err) {
     `;
 
     //Credate user_profiles table
-    const createUserProfileTableQuery = `
-        CREATE TABLE IF NOT EXISTS user_profiles (
-            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            email VARCHAR(255) NOT NULL,
-            password VARCHAR(255) NOT NULL,
+    const createUserCompanyTableQuery = `
+        CREATE TABLE IF NOT EXISTS companies (
+            user_id VARCHAR(255) NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            timezone VARCHAR(255) NOT NULL,
+            currency VARCHAR(255) NOT NULL,
+            hear_about_us VARCHAR(255) NOT NULL,
+            managing_assets VARCHAR(255) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -47,12 +52,16 @@ db.connect(function(err) {
         db.query(createUserTableQuery, (err, result) => {
             if (err) throw err;
             console.log("user table created successfully");
+        });
+
+        // Now, execute the CREATE TABLE query
+        db.query(createUserCompanyTableQuery, (err, result) => {
+            if (err) throw err;
+            console.log("company table created successfully");
     
             // Close the connection after executing the queries
             db.end();
         });
-
-
     });
   });
 
