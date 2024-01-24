@@ -1,22 +1,22 @@
-const express = require('express');
-const cors = require('cors');
-const { Client } = require('pg');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const { Client } = require("pg");
+require("dotenv").config();
 
 const db = new Client({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: 5432,
-})
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: 5432,
+});
 
-db.connect(function(err) {
-    if (err) throw err;
-    console.log("Connected!");
+db.connect(function (err) {
+  if (err) throw err;
+  console.log("Connected!");
 
-    //Create User Table
-    const createUserTableQuery = `
+  //Create User Table
+  const createUserTableQuery = `
         CREATE TABLE IF NOT EXISTS users (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             email VARCHAR(255) NOT NULL,
@@ -29,8 +29,8 @@ db.connect(function(err) {
         );
     `;
 
-    //Credate user_profiles table
-    const createUserCompanyTableQuery = `
+  //Create user_profiles table
+  const createUserCompanyTableQuery = `
         CREATE TABLE IF NOT EXISTS companies (
             user_id VARCHAR(255) NOT NULL,
             name VARCHAR(255) NOT NULL,
@@ -43,36 +43,71 @@ db.connect(function(err) {
         );
     `;
 
-    // Enable uuid-ossp extension
-    const enableUuidOsspQuery = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`;
+  //Create asset table
+  const createAssetTableQuery = `
+        CREATE TABLE IF NOT EXISTS assets (
+            user_id VARCHAR(255) NOT NULL,
+            user_name VARCHAR(255) NOT NULL, 
+            device_category VARCHAR(255) NOT NULL,
+            serial_number VARCHAR(255) NOT NULL UNIQUE,
+            asset_name VARCHAR(255) NOT NULL,
+            make VARCHAR(255),
+            model VARCHAR(255),
+            operating_system VARCHAR(255),
+            cpu VARCHAR(255),
+            memory VARCHAR(255),
+            storage VARCHAR(255),
+            date_purchased VARCHAR(255),
+            warranty_expiration_date VARCHAR(255),
+            location VARCHAR(255),
+            assigned_user VARCHAR(255),
+            asset_status VARCHAR(255) DEFAULT 'In Use',
+            cost VARCHAR(255),
+            comment VARCHAR(255),
+            custom_field_name VARCHAR(255),
+            field_type VARCHAR(255),
+            enter_details VARCHAR(255),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );   
+    `;
 
-    db.query(enableUuidOsspQuery, (err, result) => {
-        if (err) throw err;
-    
-        // Now, execute the CREATE TABLE query
-        db.query(createUserTableQuery, (err, result) => {
-            if (err) throw err;
-            console.log("user table created successfully");
-        });
+  // Enable uuid-ossp extension
+  const enableUuidOsspQuery = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`;
 
-        // Now, execute the CREATE TABLE query
-        db.query(createUserCompanyTableQuery, (err, result) => {
-            if (err) throw err;
-            console.log("company table created successfully");
-    
-            // Close the connection after executing the queries
-            db.end();
-        });
+  db.query(enableUuidOsspQuery, (err, result) => {
+    if (err) throw err;
+
+    // Now, execute the CREATE TABLE query
+    db.query(createUserTableQuery, (err, result) => {
+      if (err) throw err;
+      console.log("user table created successfully");
+    });
+
+    // Now, execute the CREATE TABLE query
+    db.query(createUserCompanyTableQuery, (err, result) => {
+      if (err) throw err;
+      console.log("company table created successfully");
+    });
+
+    // Now, execute the CREATE TABLE query
+    db.query(createAssetTableQuery, (err, result) => {
+      if (err) throw err;
+      console.log("asset table created successfully");
+
+      // Close the connection after executing the queries
+      db.end();
     });
   });
+});
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }));
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-})
+  console.log(`Server is running on port ${PORT}`);
+});
