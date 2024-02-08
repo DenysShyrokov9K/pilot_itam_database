@@ -9,7 +9,12 @@ const db = new Client({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: 5432,
+  ssl: {
+    rejectUnauthorized: false,
+  }
 });
+
+console.log('db = ', process.env.DB_PASSWORD);
 
 db.connect(function (err) {
   if (err) throw err;
@@ -51,6 +56,7 @@ db.connect(function (err) {
             device_category VARCHAR(255) NOT NULL,
             serial_number VARCHAR(255) NOT NULL UNIQUE,
             asset_name VARCHAR(255) NOT NULL,
+            activity VARCHAR(255),
             make VARCHAR(255),
             model VARCHAR(255),
             operating_system VARCHAR(255),
@@ -72,6 +78,27 @@ db.connect(function (err) {
         );   
     `;
 
+  const createTimeLineTableQuery = `
+    CREATE TABLE IF NOT EXISTS timeline (
+      serial_number VARCHAR(255) NOT NULL,
+      color VARCHAR(255) NOT NULL, 
+      info VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );   
+`;
+
+  const createForgotPasswordTableQuery = `
+  CREATE TABLE IF NOT EXISTS forgot_password (
+    email VARCHAR(255) NOT NULL,
+    otp INTEGER NOT NULL, 
+    expire_at TIMESTAMP NOT NULL,
+    password VARCHAR(255), 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );   
+`; 
+
   // Enable uuid-ossp extension
   const enableUuidOsspQuery = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`;
 
@@ -88,6 +115,18 @@ db.connect(function (err) {
     db.query(createUserCompanyTableQuery, (err, result) => {
       if (err) throw err;
       console.log("company table created successfully");
+    });
+
+    // Now, execute the CREATE TABLE query
+    db.query(createTimeLineTableQuery, (err, result) => {
+      if (err) throw err;
+      console.log("timeline table created successfully");
+    });
+
+    // Now, execute the CREATE TABLE query
+    db.query(createForgotPasswordTableQuery, (err, result) => {
+      if (err) throw err;
+      console.log("forgotPassword table created successfully");
     });
 
     // Now, execute the CREATE TABLE query
